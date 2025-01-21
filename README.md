@@ -108,6 +108,27 @@ template-mernpern-starter/
 - `npm run build` - Build for production
 - `npm start` - Start production server
 
+### Root
+
+- `npm run dev` - Start all development servers concurrently
+- `npm run dev:client` - Start client development server
+- `npm run dev:server` - Start server development server
+- `npm run dev:db` - Start MongoDB using Docker
+- `npm run install:all` - Install dependencies for root, client, and server
+- `npm run build:all` - Build client and server
+- `npm run test:all` - Run tests for client and server concurrently
+- `npm run lint:all` - Run ESLint for client and server concurrently
+- `npm run clean:all` - Clean all node_modules directories
+- `npm run docker:up` - Start Docker containers
+- `npm run docker:down` - Stop Docker containers
+- `npm run docker:build` - Build Docker containers
+- `npm run docker:clean` - Remove Docker containers and volumes
+- `npm run docker:logs` - View Docker logs
+- `npm run docker:restart` - Restart Docker containers
+- `npm run env:setup` - Set up environment files
+- `npm run env:check` - Check environment files
+- `npm run env:update` - Update environment files
+
 ## Environment Variables
 
 ### Client (.env)
@@ -123,6 +144,66 @@ PORT=3000
 NODE_ENV=development
 MONGODB_URI=mongodb://mongodb:27017/mernapp
 JWT_SECRET=your_jwt_secret
+```
+
+### Root (.env)
+
+```env
+# Add any root-level environment variables here
+```
+
+## Development Workflow
+
+1. Set up environment files:
+```bash
+npm run env:setup
+```
+
+2. Start the development environment:
+```bash
+npm run dev
+```
+
+3. To check environment files:
+```bash
+npm run env:check
+```
+
+4. To update environment files:
+```bash
+npm run env:update
+```
+
+## Docker Management
+
+1. Start Docker containers:
+```bash
+npm run docker:up
+```
+
+2. Stop Docker containers:
+```bash
+npm run docker:down
+```
+
+3. Build Docker containers:
+```bash
+npm run docker:build
+```
+
+4. Remove Docker containers and volumes:
+```bash
+npm run docker:clean
+```
+
+5. View Docker logs:
+```bash
+npm run docker:logs
+```
+
+6. Restart Docker containers:
+```bash
+npm run docker:restart
 ```
 
 ## Adding New Features
