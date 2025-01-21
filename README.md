@@ -14,26 +14,27 @@ A modern full-stack starter template using MongoDB/PostgreSQL, Express.js, React
 
 ## Getting Started
 
-### Using This Template
+### Quick Start
 
-1. Click the "Use this template" button at the top of this repository
-   - Alternatively, you can create a new repository and clone this one as a starting point
-
-2. Clone your new repository:
+1. Clone the repository:
 ```bash
 git clone https://github.com/yourusername/your-repo-name.git
 cd your-repo-name
 ```
 
+2. Install dependencies:
+```bash
+npm run install:all
+```
+
 3. Set up environment files:
 ```bash
-cp client/.env.example client/.env
-cp server/.env.example server/.env
+npm run env:setup
 ```
 
 4. Start the development environment:
 ```bash
-docker-compose up --build
+npm run dev
 ```
 
 Your application will be available at:
@@ -41,30 +42,35 @@ Your application will be available at:
 - Backend: http://localhost:3000
 - MongoDB: localhost:27017
 
-### Development Without Docker
+### Available Scripts
 
-If you prefer to develop without Docker:
+#### Development
+- `npm run dev` - Start all development servers
+- `npm run dev:client` - Start client development server
+- `npm run dev:server` - Start server development server
+- `npm run dev:db` - Start MongoDB container
 
-1. Install dependencies:
-```bash
-# Install client dependencies
-cd client
-npm install
+#### Installation
+- `npm run install:all` - Install dependencies for all packages
+- `npm run clean:all` - Remove all node_modules directories
 
-# Install server dependencies
-cd ../server
-npm install
-```
+#### Building
+- `npm run build:all` - Build all packages
+- `npm run test:all` - Run all tests
+- `npm run lint:all` - Lint all packages
 
-2. Start the development servers:
+#### Docker Management
+- `npm run docker:up` - Start all Docker containers
+- `npm run docker:down` - Stop all Docker containers
+- `npm run docker:build` - Build all Docker images
+- `npm run docker:clean` - Remove all Docker volumes
+- `npm run docker:logs` - Show container logs
+- `npm run docker:restart` - Restart all containers
 
-```bash
-# Start the client (in the client directory)
-npm run dev
-
-# Start the server (in the server directory)
-npm run dev
-```
+#### Environment Management
+- `npm run env:setup` - Create environment files from examples
+- `npm run env:check` - Validate environment variables
+- `npm run env:update` - Update environment files with new variables
 
 ## Project Structure
 
@@ -90,93 +96,86 @@ template-mernpern-starter/
 │   │   ├── services/     # Business logic
 │   │   └── types/        # TypeScript types
 │   └── ...
+├── scripts/              # Development scripts
+│   ├── setup-env.js     # Environment setup
+│   ├── check-env.js     # Environment validation
+│   └── update-env.js    # Environment updates
 └── docker-compose.yml    # Docker composition
 ```
 
-## Available Scripts
-
-### Client
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run lint` - Run ESLint
-- `npm run preview` - Preview production build
-
-### Server
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-
 ## Environment Variables
 
-### Client (.env)
+### Root (.env)
+```env
+NODE_ENV=development
+CLIENT_PORT=5173
+SERVER_PORT=3000
+MONGODB_PORT=27017
+COMPOSE_PROJECT_NAME=mernpern-starter
+```
 
+### Client (.env)
 ```env
 VITE_API_URL=http://localhost:3000
+VITE_ENABLE_ANALYTICS=false
+VITE_ENABLE_AUTH=true
+VITE_SENTRY_DSN=
+VITE_GOOGLE_ANALYTICS=
 ```
 
 ### Server (.env)
-
 ```env
 PORT=3000
 NODE_ENV=development
 MONGODB_URI=mongodb://mongodb:27017/mernapp
-JWT_SECRET=your_jwt_secret
+JWT_SECRET=your_jwt_secret_key
+SMTP_HOST=mailhog
+SMTP_PORT=1025
+EMAIL_FROM=noreply@example.com
 ```
 
-## Adding New Features
+## Development
 
-### Frontend
+### Prerequisites
+- Node.js >= 20.0.0
+- npm >= 10.0.0
+- Docker and Docker Compose
 
-1. Components: Add new components in `client/src/components`
-2. Pages: Add new pages in `client/src/pages`
-3. API Services: Add new services in `client/src/services`
-4. Types: Add new types in `client/src/types`
+### Local Development
 
-### Backend
-
-1. Routes: Add new routes in `server/src/routes`
-2. Controllers: Add new controllers in `server/src/controllers`
-3. Models: Add new models in `server/src/models`
-4. Middleware: Add new middleware in `server/src/middleware`
-
-## Deployment
-
-### Manual Deployment
-
-1. Build the client:
+1. Install dependencies:
 ```bash
-cd client
-npm run build
+npm run install:all
 ```
 
-2. Build the server:
+2. Set up environment:
 ```bash
-cd server
-npm run build
+npm run env:setup
+npm run env:check  # Validate environment
 ```
 
-3. Start the production server:
+3. Start development servers:
 ```bash
-npm start
+npm run dev
 ```
 
-### Docker Deployment
+### Using Docker
 
-A production Docker Compose file is included for deployment:
-
+1. Build and start containers:
 ```bash
-docker-compose -f docker-compose.prod.yml up --build
+npm run docker:build
+npm run docker:up
 ```
 
-## Contributing
+2. View logs:
+```bash
+npm run docker:logs
+```
 
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m 'Add some feature'`
-4. Push to the branch: `git push origin feature/your-feature`
-5. Submit a pull request
+3. Clean up:
+```bash
+npm run docker:clean
+```
 
 ## License
 
