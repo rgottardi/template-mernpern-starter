@@ -1,13 +1,14 @@
 {
   "name": "template-mernpern-starter",
   "version": "0.0.1",
+  "type": "module",
   "private": true,
   "workspaces": [
     "client",
     "server"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\" \"npm run dev:db\"",
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run dev",
     "dev:db": "docker compose up mongodb",
@@ -24,7 +25,12 @@
     "docker:restart": "docker compose restart",
     "env:setup": "node scripts/setup-env.js",
     "env:check": "node scripts/check-env.js",
-    "env:update": "node scripts/update-env.js"
+    "env:update": "node scripts/update-env.js",
+    "docker:prune": "docker system prune -f",
+    "docker:rebuild": "npm run docker:clean && npm run docker:prune && npm run docker:build && npm run docker:up",
+    "logs:mongodb": "docker logs mongodb -f",
+    "logs:server": "docker logs server -f",
+    "logs:client": "docker logs client -f"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

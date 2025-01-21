@@ -6,41 +6,41 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
 
-const copyEnvFiles = () => {
-  const envFiles = [
-    { src: '.env.example', dest: '.env' },
-    { src: 'client/.env.example', dest: 'client/.env' },
-    { src: 'server/.env.example', dest: 'server/.env' }
-  ];
+// Define environment file pairs (source -> destination)
+const envFiles = [
+  {
+    example: join(rootDir, '.env.example'),
+    target: join(rootDir, '.env')
+  },
+  {
+    example: join(rootDir, 'client', '.env.example'),
+    target: join(rootDir, 'client', '.env')
+  },
+  {
+    example: join(rootDir, 'server', '.env.example'),
+    target: join(rootDir, 'server', '.env')
+  }
+];
 
-  envFiles.forEach(({ src, dest }) => {
-    const srcPath = join(rootDir, src);
-    const destPath = join(rootDir, dest);
-
-    if (!existsSync(srcPath)) {
-      console.error(`Missing ${src} file!`);
-      return;
-    }
-
-    const destDir = dirname(destPath);
-    if (!existsSync(destDir)) {
-      mkdirSync(destDir, { recursive: true });
-    }
-
-    if (!existsSync(destPath)) {
-      copyFileSync(srcPath, destPath);
-      console.log(`✓ Created ${dest} from ${src}`);
-    } else {
-      console.log(`⚠ ${dest} already exists, skipping...`);
-    }
-  });
-};
-
-try {
-  console.log('Setting up environment files...');
-  copyEnvFiles();
-  console.log('\nEnvironment setup complete! 🚀');
-} catch (error) {
-  console.error('\n❌ Error setting up environment:', error.message);
-  process.exit(1);
+// Create scripts directory if it doesn't exist
+if (!existsSync(join(rootDir, 'scripts'))) {
+  mkdirSync(join(rootDir, 'scripts'), { recursive: true });
 }
+
+// Copy each example file to its target if it doesn't exist
+envFiles.forEach(({ example, target }) => {
+  try {
+    if (!existsSync(target) && existsSync(example)) {
+      copyFileSync(example, target);
+      console.log(`✅ Created ${target} from example file`);
+    } else if (!existsSync(example)) {
+      console.warn(`⚠️  Warning: Example file ${example} not found`);
+    } else {
+      console.log(`ℹ️  ${target} already exists, skipping`);
+    }
+  } catch (error) {
+    console.error(`❌ Error creating ${target}:`, error.message);
+  }
+});
+
+console.log('🎉 Environment setup complete!');

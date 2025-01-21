@@ -1,42 +1,65 @@
 version: '3.8'
 
 services:
-  client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile.dev
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
     ports:
-      - "5173:5173"
+      - "${MONGODB_PORT:-27017}:27017"
     volumes:
-      - ./client:/app
-      - /app/node_modules
+      - mongodb_data:/data/db
     environment:
-      - VITE_API_URL=http://localhost:3000
-    depends_on:
-      - server
+      - MONGO_INITDB_DATABASE=mernapp
+    networks:
+      - app-network
+    healthcheck:
+      test: mongosh --eval 'db.runCommand("ping").ok' --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   server:
     build:
       context: ./server
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
+    container_name: server
     ports:
-      - "3000:3000"
-    volumes:
-      - ./server:/app
-      - /app/node_modules
+      - "${SERVER_PORT:-3000}:3000"
     environment:
-      - NODE_ENV=development
-      - MONGODB_URI=mongodb://mongodb:27017/mernapp
-      - JWT_SECRET=your_jwt_secret
+      - NODE_ENV=docker
+      - PORT=${SERVER_PORT:-3000}
+      - MONGODB_URI_DOCKER=mongodb://mongodb:27017/mernapp
+      - JWT_SECRET=development_secret
     depends_on:
-      - mongodb
-
-  mongodb:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
+      mongodb:
+        condition: service_healthy
     volumes:
-      - mongodb_data:/data/db
+      - ./server:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - app-network
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: client
+    ports:
+      - "${CLIENT_PORT:-5173}:5173"
+    environment:
+      - VITE_API_URL=http://localhost:${SERVER_PORT:-3000}
+    volumes:
+      - ./client:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - app-network
+    depends_on:
+      - server
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   mongodb_data:

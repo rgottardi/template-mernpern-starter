@@ -1,13 +1,11 @@
 import React from 'react';
-import { Container, Typography } from '@mui/material';
 
 function App() {
   return (
-    <Container maxWidth="lg">
-      <Typography variant="h2" component="h1" gutterBottom>
-        Welcome to MERN/PERN Starter
-      </Typography>
-    </Container>
+    <div>
+      <h1>MERN Stack Template</h1>
+      <p>Welcome to the application!</p>
+    </div>
   );
 }
 
