@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    container_name: client-dev
+    ports:
+      - "${CLIENT_PORT:-5173}:5173"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:${SERVER_PORT:-3000}
+    volumes:
+      - ./client:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - app-network
+    command: npm run dev
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: server-dev
+    ports:
+      - "${SERVER_PORT:-3000}:3000"
+      - "${DEBUG_PORT:-9229}:9229"
+    environment:
+      - NODE_ENV=development
+      - PORT=${SERVER_PORT:-3000}
+      - MONGODB_URI_DOCKER=mongodb://mongodb:27017/mernapp
+      - JWT_SECRET=development_secret
+    volumes:
+      - ./server:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - app-network
+    command: npm run dev
+    depends_on:
+      mongodb:
+        condition: service_healthy
