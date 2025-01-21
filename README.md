@@ -14,25 +14,169 @@ A modern full-stack starter template using MongoDB/PostgreSQL, Express.js, React
 
 ## Getting Started
 
-1. Clone this repository
-2. Run `docker-compose up --build`
-3. Access the application:
-   - Frontend: http://localhost:5173
-   - Backend: http://localhost:3000
+### Using This Template
+
+1. Click the "Use this template" button at the top of this repository
+   - Alternatively, you can create a new repository and clone this one as a starting point
+
+2. Clone your new repository:
+```bash
+git clone https://github.com/yourusername/your-repo-name.git
+cd your-repo-name
+```
+
+3. Set up environment files:
+```bash
+cp client/.env.example client/.env
+cp server/.env.example server/.env
+```
+
+4. Start the development environment:
+```bash
+docker-compose up --build
+```
+
+Your application will be available at:
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3000
+- MongoDB: localhost:27017
+
+### Development Without Docker
+
+If you prefer to develop without Docker:
+
+1. Install dependencies:
+```bash
+# Install client dependencies
+cd client
+npm install
+
+# Install server dependencies
+cd ../server
+npm install
+```
+
+2. Start the development servers:
+
+```bash
+# Start the client (in the client directory)
+npm run dev
+
+# Start the server (in the server directory)
+npm run dev
+```
 
 ## Project Structure
 
 ```
 template-mernpern-starter/
-├── client/          # React frontend
-├── server/          # Express backend
-├── docker-compose.yml
-└── README.md
+├── client/                 # React frontend
+│   ├── src/
+│   │   ├── components/    # Reusable components
+│   │   ├── hooks/        # Custom hooks
+│   │   ├── pages/        # Page components
+│   │   ├── services/     # API services
+│   │   ├── store/        # State management
+│   │   ├── theme/        # MUI theme configuration
+│   │   └── types/        # TypeScript types
+│   └── ...
+├── server/                # Express backend
+│   ├── src/
+│   │   ├── config/       # Configuration files
+│   │   ├── controllers/  # Route controllers
+│   │   ├── middleware/   # Express middleware
+│   │   ├── models/       # Database models
+│   │   ├── routes/       # API routes
+│   │   ├── services/     # Business logic
+│   │   └── types/        # TypeScript types
+│   └── ...
+└── docker-compose.yml    # Docker composition
 ```
 
-## Development
+## Available Scripts
 
-This template uses Docker Compose for local development. All necessary services (MongoDB, client, server) are configured and ready to use.
+### Client
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint
+- `npm run preview` - Preview production build
+
+### Server
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm start` - Start production server
+
+## Environment Variables
+
+### Client (.env)
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+### Server (.env)
+
+```env
+PORT=3000
+NODE_ENV=development
+MONGODB_URI=mongodb://mongodb:27017/mernapp
+JWT_SECRET=your_jwt_secret
+```
+
+## Adding New Features
+
+### Frontend
+
+1. Components: Add new components in `client/src/components`
+2. Pages: Add new pages in `client/src/pages`
+3. API Services: Add new services in `client/src/services`
+4. Types: Add new types in `client/src/types`
+
+### Backend
+
+1. Routes: Add new routes in `server/src/routes`
+2. Controllers: Add new controllers in `server/src/controllers`
+3. Models: Add new models in `server/src/models`
+4. Middleware: Add new middleware in `server/src/middleware`
+
+## Deployment
+
+### Manual Deployment
+
+1. Build the client:
+```bash
+cd client
+npm run build
+```
+
+2. Build the server:
+```bash
+cd server
+npm run build
+```
+
+3. Start the production server:
+```bash
+npm start
+```
+
+### Docker Deployment
+
+A production Docker Compose file is included for deployment:
+
+```bash
+docker-compose -f docker-compose.prod.yml up --build
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/your-feature`
+3. Commit your changes: `git commit -m 'Add some feature'`
+4. Push to the branch: `git push origin feature/your-feature`
+5. Submit a pull request
 
 ## License
 
