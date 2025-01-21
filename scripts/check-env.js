@@ -1,66 +1,72 @@
-import { readFileSync, existsSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'fs';
+import path from 'path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const rootDir = join(__dirname, '..');
+const checkEnv = () => {
+  const envFiles = [
+    { path: '.env', example: '.env.example' },
+    { path: 'client/.env', example: 'client/.env.example' },
+    { path: 'server/.env', example: 'server/.env.example' }
+  ];
 
-const checkEnvFile = (path, requiredVars) => {
-  if (!existsSync(path)) {
-    console.error(`❌ Missing ${path.split('/').pop()} file!`);
-    return false;
+  let hasErrors = false;
+
+  envFiles.forEach(({ path: envPath, example }) => {
+    try {
+      if (!fs.existsSync(example)) {
+        console.error(`❌ ${example} not found`);
+        hasErrors = true;
+        return;
+      }
+
+      if (!fs.existsSync(envPath)) {
+        console.error(`❌ ${envPath} not found`);
+        hasErrors = true;
+        return;
+      }
+
+      const exampleVars = new Set(
+        fs.readFileSync(example, 'utf8')
+          .split('\n')
+          .filter(line => line.trim() && !line.startsWith('#'))
+          .map(line => line.split('=')[0])
+      );
+
+      const envVars = new Set(
+        fs.readFileSync(envPath, 'utf8')
+          .split('\n')
+          .filter(line => line.trim() && !line.startsWith('#'))
+          .map(line => line.split('=')[0])
+      );
+
+      console.log(`\nChecking ${envPath}...`);
+      
+      // Check for missing variables
+      exampleVars.forEach(variable => {
+        if (!envVars.has(variable)) {
+          console.log(`⚠️  Missing variable: ${variable}`);
+          hasErrors = true;
+        }
+      });
+
+      // Check for extra variables
+      envVars.forEach(variable => {
+        if (!exampleVars.has(variable)) {
+          console.log(`ℹ️  Extra variable found: ${variable}`);
+        }
+      });
+
+      if (!hasErrors) {
+        console.log('✅ All required variables are present');
+      }
+    } catch (error) {
+      console.error(`Error checking ${envPath}:`, error.message);
+      hasErrors = true;
+    }
+  });
+
+  if (hasErrors) {
+    process.exit(1);
   }
-
-  const content = readFileSync(path, 'utf8');
-  const variables = content
-    .split('\n')
-    .filter(line => line.trim() && !line.startsWith('#'))
-    .map(line => line.split('=')[0].trim());
-
-  const missing = requiredVars.filter(v => !variables.includes(v));
-  const hasAllRequired = missing.length === 0;
-
-  if (!hasAllRequired) {
-    console.error(`\n❌ Missing required variables in ${path.split('/').pop()}:`);
-    missing.forEach(v => console.error(`   - ${v}`));
-  } else {
-    console.log(`✓ ${path.split('/').pop()} has all required variables`);
-  }
-
-  return hasAllRequired;
 };
 
-const checkEnvironment = () => {
-  console.log('Checking environment files...\n');
-  
-  const rootEnv = checkEnvFile(join(rootDir, '.env'), [
-    'NODE_ENV'
-  ]);
-
-  const clientEnv = checkEnvFile(join(rootDir, 'client/.env'), [
-    'VITE_API_URL'
-  ]);
-
-  const serverEnv = checkEnvFile(join(rootDir, 'server/.env'), [
-    'PORT',
-    'MONGODB_URI',
-    'JWT_SECRET'
-  ]);
-
-  const allValid = rootEnv && clientEnv && serverEnv;
-
-  console.log('\n' + (allValid 
-    ? '✨ All environment files are properly configured!'
-    : '⚠ Some environment variables are missing. Please check the errors above.'));
-
-  return allValid;
-};
-
-try {
-  const isValid = checkEnvironment();
-  process.exit(isValid ? 0 : 1);
-} catch (error) {
-  console.error('\n❌ Error checking environment:', error.message);
-  process.exit(1);
-}
+checkEnv();
