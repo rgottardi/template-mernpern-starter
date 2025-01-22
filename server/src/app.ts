@@ -3,11 +3,11 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { errorHandler } from './middleware/error.js';
+import { CONFIG } from './config/index.js';
 
 dotenv.config();
 
 const app: Express = express();
-const port: number = Number(process.env.PORT) || Number(process.env.SERVER_PORT) || 3000;
 
 // Middleware
 app.use(cors());
@@ -29,17 +29,17 @@ app.get('/health', (_req, res) => {
     status: 'ok', 
     timestamp: new Date().toISOString(),
     mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    environment: process.env.NODE_ENV,
-    port: port
+    environment: CONFIG.NODE_ENV,
+    port: CONFIG.PORT
   });
 });
 
 // Debug route
 app.get('/debug', (_req, res) => {
   res.json({
-    environment: process.env.NODE_ENV,
-    mongoURI: process.env.NODE_ENV === 'docker' ? 'mongodb://mongodb:27017/mernapp' : 'mongodb://127.0.0.1:27017/mernapp',
-    port: port,
+    environment: CONFIG.NODE_ENV,
+    mongoURI: CONFIG.MONGODB.URI,
+    port: CONFIG.PORT,
     mongooseState: mongoose.connection.readyState,
     nodeVersion: process.version,
     memoryUsage: process.memoryUsage(),
@@ -50,27 +50,18 @@ app.get('/debug', (_req, res) => {
 // Error handling
 app.use(errorHandler);
 
-// Determine MongoDB URI based on environment
-const mongoURI: string = process.env.NODE_ENV === 'docker' 
-  ? process.env.MONGODB_URI_DOCKER ?? 'mongodb://mongodb:27017/mernapp'
-  : process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/mernapp';
-
-// Add debug logging
+// Update logging
 console.log('🚀 Server starting up...');
-console.log(`🔧 Environment: ${process.env.NODE_ENV}`);
-console.log(`📡 MongoDB URI: ${mongoURI}`);
-console.log(`🔍 Running in Docker: ${process.env.NODE_ENV === 'docker' ? 'Yes' : 'No'}`);
-console.log(`🌐 Server will listen on port: ${port}`);
+console.log(`🔧 Environment: ${CONFIG.NODE_ENV}`);
+console.log(`📡 MongoDB URI: ${CONFIG.MONGODB.URI}`);
+console.log(`🔍 Running in Docker: ${CONFIG.NODE_ENV === 'docker' ? 'Yes' : 'No'}`);
+console.log(`🌐 Server will listen on port: ${CONFIG.PORT}`);
 
-// Database connection with retry logic
-const connectWithRetry = async (retries = 5, interval = 5000): Promise<boolean> => {
+// Update database connection
+const connectWithRetry = async (retries = CONFIG.DEBUG.RETRY_ATTEMPTS, interval = CONFIG.DEBUG.RETRY_INTERVAL): Promise<boolean> => {
   for (let i = 0; i < retries; i++) {
     try {
-      await mongoose.connect(mongoURI, {
-        serverSelectionTimeoutMS: 5000,
-        socketTimeoutMS: 45000,
-        connectTimeoutMS: 10000,
-      });
+      await mongoose.connect(CONFIG.MONGODB.URI, CONFIG.MONGODB.OPTIONS);
       console.log('✅ Connected to MongoDB');
       return true;
     } catch (error) {
@@ -85,12 +76,12 @@ const connectWithRetry = async (retries = 5, interval = 5000): Promise<boolean> 
   return false;
 };
 
-// Start server only after successful database connection
+// Start server
 connectWithRetry()
   .then(success => {
     if (success) {
-      app.listen(port, '0.0.0.0', () => {
-        console.log(`🚀 Server running on http://localhost:${port}`);
+      app.listen(CONFIG.PORT, '0.0.0.0', () => {
+        console.log(`🚀 Server running on http://localhost:${CONFIG.PORT}`);
         console.log('📍 Available routes:');
         console.log('   - GET /         -> Basic server check');
         console.log('   - GET /health   -> Health status');
