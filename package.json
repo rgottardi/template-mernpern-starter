@@ -17,6 +17,7 @@
     "dev:redis": "docker compose up redis",
     "dev:mailhog": "docker compose up mailhog",
     "dev:localstack": "docker compose up localstack",
+    "dev:admin": "docker compose up mongo-express pgadmin redis-commander",
     "install:all": "npm install && cd client && npm install && cd ../server && npm install",
     "build:all": "cd client && npm run build && cd ../server && npm run build",
     "test:all": "concurrently \"cd client && npm test\" \"cd server && npm test\"",
@@ -39,7 +40,10 @@
     "logs:mailhog": "docker logs mailhog -f",
     "logs:localstack": "docker logs localstack -f",
     "logs:server": "docker logs server -f",
-    "logs:client": "docker logs client -f"
+    "logs:client": "docker logs client -f",
+    "logs:mongo-express": "docker logs mongo-express -f",
+    "logs:pgadmin": "docker logs pgadmin -f",
+    "logs:redis-commander": "docker logs redis-commander -f"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
