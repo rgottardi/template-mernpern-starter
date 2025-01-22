@@ -43,7 +43,10 @@
     "logs:client": "docker logs client -f",
     "logs:mongo-express": "docker logs mongo-express -f",
     "logs:pgadmin": "docker logs pgadmin -f",
-    "logs:redis-commander": "docker logs redis-commander -f"
+    "logs:redis-commander": "docker logs redis-commander -f",
+    "docker:clean:localstack": "npm run docker:down && npm run docker:clean && docker volume rm ${COMPOSE_PROJECT_NAME:-mernpern-starter}_localstack_data && npm run docker:up",
+    "docker:clean:all": "npm run docker:down && npm run docker:clean && docker volume prune -f && npm run docker:up",
+    "docker:reset": "npm run docker:down && npm run docker:clean && docker system prune -f && docker volume prune -f && npm run docker:up"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
