@@ -1,11 +1,10 @@
-import express, { Express, Request, Response } from 'express';
-import cors from 'cors';
-import mongoose from 'mongoose';
+import express, { Express } from 'express';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import { errorHandler } from './middleware/error.js';
 import { CONFIG } from './config/index.js';
 import { logger, stream } from './config/logger.js';
+import { fileURLToPath } from 'url';
 import { 
   rateLimiter, 
   securityHeaders, 
@@ -15,6 +14,8 @@ import {
 import { responseFormatter } from './middleware/response.js';
 import { authenticateToken } from './middleware/auth.js';
 import { tenantMiddleware } from './middleware/tenant.js';
+import { databaseService } from './services/database.js';
+import { serviceInitializer } from './services/init.js';
 
 dotenv.config();
 
@@ -45,7 +46,7 @@ app.get('/health', (_req, res) => {
   res.success({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    mongodb: databaseService.getConnectionState() === 1 ? 'connected' : 'disconnected',
     environment: CONFIG.NODE_ENV,
     port: CONFIG.PORT
   });
@@ -63,7 +64,7 @@ app.get('/api/debug', (_req, res) => {
     environment: CONFIG.NODE_ENV,
     mongoURI: CONFIG.MONGODB.URI,
     port: CONFIG.PORT,
-    mongooseState: mongoose.connection.readyState,
+    mongooseState: databaseService.getConnectionState(),
     nodeVersion: process.version,
     memoryUsage: process.memoryUsage(),
     uptime: process.uptime()
@@ -73,57 +74,61 @@ app.get('/api/debug', (_req, res) => {
 // Error handling (should be last)
 app.use(errorHandler);
 
-// Update logging
-logger.info('🚀 Server starting up...');
-logger.info(`🔧 Environment: ${CONFIG.NODE_ENV}`);
-logger.info(`📡 MongoDB URI: ${CONFIG.MONGODB.URI}`);
-logger.info(`🔍 Running in Docker: ${CONFIG.NODE_ENV === 'docker' ? 'Yes' : 'No'}`);
-logger.info(`🌐 Server will listen on port: ${CONFIG.PORT}`);
-
-// Update database connection
-const connectWithRetry = async (retries = CONFIG.DEBUG.RETRY_ATTEMPTS, interval = CONFIG.DEBUG.RETRY_INTERVAL): Promise<boolean> => {
-  for (let i = 0; i < retries; i++) {
+// Initialize services and start server
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
+  const startServer = async () => {
     try {
-      await mongoose.connect(CONFIG.MONGODB.URI, CONFIG.MONGODB.OPTIONS);
-      logger.info('✅ Connected to MongoDB');
-      return true;
-    } catch (error) {
-      const remaining = retries - i - 1;
-      logger.error('❌ MongoDB connection attempt failed:', {
-        attempt: i + 1,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        remaining,
-      });
-      if (remaining > 0) {
-        logger.info(`⏳ Retrying in ${interval/1000}s... (${remaining} attempts remaining)`);
-        await new Promise(resolve => setTimeout(resolve, interval));
+      // Initialize all services
+      const servicesInitialized = await serviceInitializer.initializeServices();
+      if (!servicesInitialized) {
+        throw new Error('Failed to initialize services');
       }
-    }
-  }
-  return false;
-};
 
-// Start server
-connectWithRetry()
-  .then(success => {
-    if (success) {
+      // Start Express server
       app.listen(CONFIG.PORT, '0.0.0.0', () => {
         logger.info(`🚀 Server running on http://localhost:${CONFIG.PORT}`);
         logger.info('📍 Available routes:');
         logger.info('   - GET /         -> Basic server check');
         logger.info('   - GET /health   -> Health status');
-        logger.info('   - GET /debug    -> Debug information');
+        logger.info('   - GET /api/debug -> Debug information (protected)');
       });
-    } else {
-      logger.error('❌ Failed to connect to MongoDB after multiple retries');
+
+      // Handle graceful shutdown
+      const shutdown = async (signal: string) => {
+        logger.info(`📥 Received ${signal}. Starting graceful shutdown...`);
+        await serviceInitializer.shutdownServices();
+        process.exit(0);
+      };
+
+      // Handle different termination signals
+      process.on('SIGTERM', () => shutdown('SIGTERM'));
+      process.on('SIGINT', () => shutdown('SIGINT'));
+      
+      // Handle uncaught errors
+      process.on('uncaughtException', (error: Error) => {
+        logger.error('❌ Uncaught Exception:', {
+          error: error.message,
+        });
+        shutdown('uncaughtException');
+      });
+      
+      process.on('unhandledRejection', (reason: unknown) => {
+        logger.error('❌ Unhandled Rejection:', {
+          reason: reason instanceof Error ? reason.message : 'Unknown reason',
+        });
+        shutdown('unhandledRejection');
+      });
+
+    } catch (error) {
+      logger.error('❌ Fatal error during startup:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       process.exit(1);
     }
-  })
-  .catch((error: unknown) => {
-    logger.error('❌ Fatal error during startup:', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-    process.exit(1);
-  });
+  };
+
+  startServer();
+}
 
 export default app;
