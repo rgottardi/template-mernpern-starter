@@ -1,0 +1,243 @@
+{
+  "project": {
+    "name": "MERN/PERN Stack Starter Template",
+    "description": "A modern full-stack starter template with multi-tenant support and comprehensive service architecture",
+    "type": "Full-Stack Web Application",
+    "architecture": "Microservices-inspired Monolith",
+    "intent": "Provide a production-ready foundation for building scalable, secure, multi-tenant web applications"
+  },
+
+  "architecture": {
+    "pattern": "Service-Oriented Architecture",
+    "style": "Modern ESM-based TypeScript",
+    "key_principles": [
+      "Separation of Concerns",
+      "Single Responsibility",
+      "Dependency Injection",
+      "Service Encapsulation",
+      "Middleware Chain"
+    ],
+    "implementation_patterns": {
+      "service_pattern": "Singleton with getInstance()",
+      "error_handling": "Multi-level with graceful degradation",
+      "configuration": "Environment-aware with Docker detection",
+      "initialization": "Sequential with health checks"
+    }
+  },
+
+  "services": {
+    "initialization": {
+      "manager": "ServiceInitializer",
+      "pattern": "Singleton",
+      "sequence": [
+        "MongoDB",
+        "PostgreSQL",
+        "Redis",
+        "Email",
+        "Storage"
+      ],
+      "implementation": {
+        "file": "server/src/services/init.ts",
+        "key_methods": [
+          "initializeServices(): Promise<boolean>",
+          "shutdownServices(): Promise<void>"
+        ],
+        "error_handling": "Try-catch with logging and graceful shutdown"
+      }
+    },
+    "database": {
+      "primary": {
+        "type": "MongoDB",
+        "purpose": "Document storage for flexible data structures",
+        "implementation": {
+          "file": "server/src/services/database.ts",
+          "connection_management": {
+            "retry_strategy": true,
+            "health_monitoring": true,
+            "connection_pooling": true
+          },
+          "key_methods": [
+            "connect(): Promise<boolean>",
+            "disconnect(): Promise<void>",
+            "getConnectionState(): string"
+          ]
+        }
+      },
+      "relational": {
+        "type": "PostgreSQL",
+        "purpose": "Structured data storage for relational data",
+        "implementation": {
+          "file": "server/src/services/postgres.ts",
+          "connection_management": {
+            "pool_config": {
+              "max_connections": 20,
+              "idle_timeout": 30000,
+              "connection_timeout": 2000
+            },
+            "event_handlers": [
+              "error",
+              "connect",
+              "remove"
+            ]
+          },
+          "key_methods": [
+            "connect(): Promise<boolean>",
+            "disconnect(): Promise<void>",
+            "getClient(): Promise<PoolClient | null>",
+            "transaction<T>(callback): Promise<T>"
+          ]
+        }
+      },
+      "cache": {
+        "type": "Redis",
+        "purpose": "In-memory caching and session storage",
+        "implementation": {
+          "file": "server/src/services/redis.ts",
+          "connection_management": {
+            "retry_strategy": "Exponential backoff",
+            "max_retries": 3,
+            "ready_check": true
+          },
+          "event_handlers": [
+            "error",
+            "reconnecting",
+            "ready"
+          ]
+        }
+      }
+    },
+    "storage": {
+      "type": "LocalStack S3",
+      "purpose": "File storage and management",
+      "implementation": {
+        "file": "server/src/services/storage.ts",
+        "initialization": {
+          "client_config": {
+            "endpoint": "CONFIG.AWS.ENDPOINT",
+            "force_path_style": true,
+            "region": "CONFIG.AWS.REGION"
+          },
+          "features": [
+            "Default bucket creation",
+            "Health monitoring",
+            "Connection state tracking"
+          ]
+        }
+      }
+    },
+    "email": {
+      "type": "MailHog",
+      "purpose": "Email service for development and testing",
+      "implementation": {
+        "file": "server/src/services/email.ts",
+        "configuration": {
+          "host": "Environment-aware (Docker/Local)",
+          "port": "Configurable SMTP port",
+          "from_address": "Configurable sender"
+        }
+      }
+    }
+  },
+
+  "middleware": {
+    "security": {
+      "components": [
+        "Helmet headers",
+        "CORS",
+        "Rate limiting",
+        "Compression"
+      ],
+      "implementation": {
+        "file": "server/src/middleware/security.ts",
+        "cors_config": {
+          "development_origins": ["http://127.0.0.1:5173"],
+          "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+          "credentials": true
+        }
+      }
+    },
+    "authentication": {
+      "type": "JWT",
+      "implementation": {
+        "protected_route_pattern": "/api/*",
+        "middleware_chain": [
+          "authenticateToken",
+          "tenantMiddleware"
+        ]
+      }
+    },
+    "response_formatting": {
+      "file": "server/src/middleware/response.ts",
+      "methods_added": {
+        "success": "standardized success response",
+        "error": "standardized error response"
+      }
+    }
+  },
+
+  "error_handling": {
+    "levels": [
+      "Service level",
+      "Middleware level",
+      "Application level",
+      "Process level"
+    ],
+    "implementation": {
+      "service_level": {
+        "pattern": "Try-catch with logging",
+        "recovery": "Automatic reconnection"
+      },
+      "process_level": {
+        "handlers": [
+          "uncaughtException",
+          "unhandledRejection",
+          "SIGTERM",
+          "SIGINT"
+        ],
+        "action": "Graceful shutdown sequence"
+      }
+    }
+  },
+
+  "development": {
+    "tools": {
+      "database_management": [
+        "MongoDB Express",
+        "pgAdmin"
+      ],
+      "cache_management": [
+        "Redis Commander"
+      ],
+      "email_testing": [
+        "MailHog UI"
+      ]
+    },
+    "ports": {
+      "frontend": 5173,
+      "backend": 3000,
+      "mongodb": 27017,
+      "postgres": 5432,
+      "redis": 6379,
+      "mailhog": 8025,
+      "mongo_express": 8081,
+      "pgadmin": 5050,
+      "redis_commander": 8082,
+      "localstack": 4566
+    }
+  },
+
+  "code_patterns": {
+    "service_initialization": {
+      "pattern": "Sequential with validation",
+      "example": "const servicesInitialized = await serviceInitializer.initializeServices();"
+    },
+    "connection_management": {
+      "pattern": "Pool with retry",
+      "example": "this.pool = new Pool({ max: 20, idleTimeoutMillis: 30000 });"
+    },
+    "error_handling": {
+      "pattern": "Multi-level with logging",
+      "example": "logger.error('❌ Service initialization failed:', { error: error.message });"
+    }
+  }
+}
