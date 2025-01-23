@@ -306,3 +306,107 @@ AWS_ENDPOINT=http://localstack:4566
 ## License
 
 MIT
+
+### Service Administration
+
+#### MongoDB (via MongoDB Express)
+- **URL**: http://localhost:8081
+- **Default Credentials**: None (development mode)
+- **Features**:
+  - Browse/create/delete databases
+  - Manage collections and documents
+  - Import/export data
+  - Execute queries
+
+#### PostgreSQL (via pgAdmin)
+- **URL**: http://localhost:5050
+- **Default Credentials**:
+  - Email: admin@admin.com
+  - Password: admin
+- **First-time Setup**:
+  1. Log in to pgAdmin
+  2. Add New Server:
+     - Name: Local Docker
+     - Host: postgres
+     - Port: 5432
+     - Username: postgres
+     - Password: postgres
+
+#### Redis (via Redis Commander)
+- **URL**: http://localhost:8082
+- **Default Credentials**: None (development mode)
+- **Features**:
+  - View/edit keys
+  - Monitor memory usage
+  - Execute Redis commands
+
+#### Email Testing (MailHog)
+- **URL**: http://localhost:8025
+- **Default Credentials**: None (development mode)
+- **Features**:
+  - View all outgoing emails
+  - Inspect email content (HTML/Text)
+  - Release/delete emails
+
+#### LocalStack (S3)
+- **Endpoint**: http://localhost:4566
+- **Default Credentials**:
+  - Access Key: test
+  - Secret Key: test
+- **Testing with AWS CLI**:
+  ```bash
+  aws --endpoint-url=http://localhost:4566 s3 ls
+  ```
+- **Features**:
+  - Create/delete buckets
+  - Upload/download files
+  - Manage access policies
+
+#### Service Logs
+View logs for specific services:
+```bash
+# Database logs
+npm run logs:mongodb
+npm run logs:postgres
+npm run logs:redis
+
+# Tool logs
+npm run logs:mongo-express
+npm run logs:pgadmin
+npm run logs:redis-commander
+npm run logs:mailhog
+npm run logs:localstack
+
+# Application logs
+npm run logs:server
+npm run logs:client
+```
+
+#### Common Tasks
+
+**Reset Specific Service**:
+```bash
+# Reset LocalStack (S3)
+npm run docker:clean:localstack
+
+# Reset all services
+npm run docker:clean:all
+```
+
+**Rebuild Services**:
+```bash
+# Rebuild and restart all services
+npm run docker:rebuild
+```
+
+**Service Maintenance**:
+```bash
+# Stop all services
+npm run docker:down
+
+# Start all services
+npm run docker:up
+
+# Restart specific service
+docker compose restart [service-name]
+```

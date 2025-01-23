@@ -13,43 +13,43 @@ import {
 } from '@mui/material';
 import {
   Menu as MenuIcon,
-  Storage as StorageIcon,
+  Assessment as AssessmentIcon,
   Security as SecurityIcon,
-  Speed as SpeedIcon,
-  Cloud as CloudIcon,
+  Architecture as ArchitectureIcon,
+  Storage as StorageIcon,
 } from '@mui/icons-material';
 
 /**
- * @desc Modern landing page component with Material UI
+ * @desc Enterprise QMS styled landing page component
  */
 function App() {
   const features = [
     {
-      title: 'Multi-Database Support',
-      description: 'MongoDB for flexibility, PostgreSQL for relations',
-      icon: <StorageIcon sx={{ fontSize: 40 }} />,
+      title: 'Quality Management',
+      description: 'Comprehensive multi-tenant architecture with role-based access control',
+      icon: <AssessmentIcon sx={{ fontSize: 40 }} />,
     },
     {
       title: 'Enterprise Security',
-      description: 'JWT authentication, rate limiting, and CORS protection',
+      description: 'Advanced authentication, audit trails, and data protection',
       icon: <SecurityIcon sx={{ fontSize: 40 }} />,
     },
     {
-      title: 'High Performance',
-      description: 'Redis caching and optimized service architecture',
-      icon: <SpeedIcon sx={{ fontSize: 40 }} />,
+      title: 'Service Architecture',
+      description: 'Microservices-inspired design with robust service management',
+      icon: <ArchitectureIcon sx={{ fontSize: 40 }} />,
     },
     {
-      title: 'Cloud Ready',
-      description: 'Docker support with S3-compatible storage',
-      icon: <CloudIcon sx={{ fontSize: 40 }} />,
+      title: 'Data Management',
+      description: 'Multi-database support with MongoDB and PostgreSQL',
+      icon: <StorageIcon sx={{ fontSize: 40 }} />,
     },
   ];
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box>
       {/* Navigation Bar */}
-      <AppBar position="static" elevation={0}>
+      <AppBar position="static">
         <Toolbar>
           <IconButton
             size="large"
@@ -61,7 +61,7 @@ function App() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            MERN/PERN Stack
+            Enterprise QMS Template
           </Typography>
           <Button color="inherit">Documentation</Button>
           <Button color="inherit">GitHub</Button>
@@ -69,25 +69,26 @@ function App() {
       </AppBar>
 
       {/* Hero Section */}
-      <Box
-        sx={{
-          bgcolor: 'primary.main',
-          color: 'primary.contrastText',
-          py: 8,
-          textAlign: 'center',
-        }}
-      >
+      <Box sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', py: 10 }}>
         <Container maxWidth="md">
           <Typography
             variant="h2"
             component="h1"
             gutterBottom
-            sx={{ fontWeight: 'bold' }}
+            sx={{ fontSize: { xs: '2.5rem', md: '3.5rem' } }}
           >
-            Modern Full-Stack Template
+            Quality Management System
           </Typography>
-          <Typography variant="h5" paragraph sx={{ mb: 4, opacity: 0.9 }}>
-            Production-ready starter template with multi-tenant support and comprehensive service architecture
+          <Typography 
+            variant="h5" 
+            paragraph 
+            sx={{ 
+              mb: 4,
+              maxWidth: '800px',
+              mx: 'auto'
+            }}
+          >
+            A comprehensive enterprise-grade template for building secure, scalable, and compliant applications
           </Typography>
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
@@ -97,21 +98,20 @@ function App() {
             <Button
               variant="contained"
               size="large"
-              sx={{
-                bgcolor: 'background.paper',
-                color: 'primary.main',
-                '&:hover': {
-                  bgcolor: 'background.paper',
-                  opacity: 0.9,
-                },
-              }}
+              color="secondary"
             >
               Get Started
             </Button>
             <Button
               variant="outlined"
               size="large"
-              sx={{ color: 'background.paper', borderColor: 'background.paper' }}
+              sx={{ 
+                color: 'common.white', 
+                borderColor: 'rgba(255, 255, 255, 0.5)',
+                '&:hover': {
+                  borderColor: 'common.white',
+                }
+              }}
             >
               Learn More
             </Button>
@@ -120,30 +120,17 @@ function App() {
       </Box>
 
       {/* Features Section */}
-      <Container sx={{ py: 8 }}>
+      <Container>
         <Grid container spacing={4}>
           {features.map((feature, index) => (
             <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  textAlign: 'center',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                  },
-                }}
-                elevation={0}
-              >
+              <Card>
                 <CardContent>
-                  <Box sx={{ mb: 2, color: 'primary.main' }}>{feature.icon}</Box>
+                  <Box sx={{ mb: 2, color: 'secondary.main' }}>{feature.icon}</Box>
                   <Typography
                     gutterBottom
                     variant="h6"
                     component="h2"
-                    sx={{ fontWeight: 'bold' }}
                   >
                     {feature.title}
                   </Typography>
@@ -161,20 +148,22 @@ function App() {
       <Box
         component="footer"
         sx={{
-          py: 3,
+          py: 4,
           px: 2,
           mt: 'auto',
-          backgroundColor: (theme) =>
-            theme.palette.mode === 'light'
-              ? theme.palette.grey[200]
-              : theme.palette.grey[800],
+          borderTop: '1px solid',
+          borderColor: 'divider',
         }}
       >
         <Container maxWidth="sm">
-          <Typography variant="body2" color="text.secondary" align="center">
+          <Typography 
+            variant="body2" 
+            color="text.secondary" 
+            align="center"
+          >
             {'© '}
             {new Date().getFullYear()}
-            {' MERN/PERN Stack Template. All rights reserved.'}
+            {' Enterprise QMS Template. All rights reserved.'}
           </Typography>
         </Container>
       </Box>
