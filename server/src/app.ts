@@ -12,11 +12,12 @@ import {
   corsMiddleware 
 } from './middleware/security.js';
 import { responseFormatter } from './middleware/response.js';
-import { authenticateToken } from './middleware/auth.js';
+import { authenticate } from './middleware/auth.js';
 import { tenantMiddleware } from './middleware/tenant.js';
 import { databaseService } from './services/database.js';
 import { serviceInitializer } from './services/init.js';
 import routes from './routes/index.js';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ const app: Express = express();
 // Basic middleware (should be first)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Security middleware
 app.use(securityHeaders); // Helmet security headers
@@ -48,7 +50,7 @@ app.use('/health', routes);
 
 // Protected routes
 app.use('/api', [
-  authenticateToken, // JWT authentication
+  authenticate, // JWT authentication
   tenantMiddleware, // Multi-tenant handling
   routes
 ]);

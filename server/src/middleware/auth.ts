@@ -1,9 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyToken } from '../config/jwt';
-import { APIError } from './error';
+import { verifyAccessToken } from '../config/jwt.js';
+import { APIError } from './error.js';
+import { User } from '../models/user.model.js';
 
 export interface AuthRequest extends Request {
-  userId?: string;
+  user?: {
+    userId: string;
+    email: string;
+    role: string;
+    tenantId?: string;
+  };
 }
 
 export const authenticate = async (
@@ -14,12 +20,20 @@ export const authenticate = async (
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
-      throw new APIError('No token provided', 401);
+      throw new APIError('No token provided', 401, 'TOKEN_MISSING');
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = verifyToken(token);
-    req.userId = decoded.userId;
+    const decoded = verifyAccessToken(token);
+
+    // Verify user still exists
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      throw new APIError('User not found', 401, 'USER_NOT_FOUND');
+    }
+
+    // Add user info to request
+    req.user = decoded;
     next();
   } catch (error) {
     next(error);
@@ -29,15 +43,13 @@ export const authenticate = async (
 export const authorize = (roles: string[]) => {
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      if (!req.userId) {
-        throw new APIError('User not authenticated', 401);
+      if (!req.user) {
+        throw new APIError('User not authenticated', 401, 'NOT_AUTHENTICATED');
       }
 
-      // Get user from database and check role
-      // const user = await UserModel.findById(req.userId);
-      // if (!user || !roles.includes(user.role)) {
-      //   throw new APIError('Not authorized', 403);
-      // }
+      if (!roles.includes(req.user.role)) {
+        throw new APIError('Not authorized', 403, 'NOT_AUTHORIZED');
+      }
 
       next();
     } catch (error) {
