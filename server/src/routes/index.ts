@@ -9,7 +9,7 @@ const router = Router();
 router.use('/health', healthRoutes);
 router.use('/auth', authRoutes);
 
-// Protected routes (these will be protected by middleware in app.ts)
+// Protected routes
 router.use('/debug', debugRoutes);
 
 export default router; 

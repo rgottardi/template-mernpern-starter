@@ -22,7 +22,12 @@ export const loginSchema = z.object({
 });
 
 export const refreshTokenSchema = z.object({
-  body: z.object({
-    refreshToken: z.string(),
+  cookies: z.object({
+    refreshToken: z.string({
+      required_error: "Refresh token is required"
+    })
   }),
+  body: z.object({}).optional(),
+  query: z.object({}).optional(),
+  params: z.object({}).optional()
 }); 

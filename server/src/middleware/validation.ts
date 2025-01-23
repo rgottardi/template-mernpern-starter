@@ -18,23 +18,25 @@ export const validateRequest = (schema: AnyZodObject) => {
         body: req.body,
         query: req.query,
         params: req.params,
+        cookies: req.cookies
       });
       next();
-    } catch (error: unknown) {
+    } catch (error) {
       if (error instanceof ZodError) {
         const validationErrors: ValidationError[] = error.issues.map((err: ZodIssue) => ({
           path: err.path.join('.'),
           message: err.message,
         }));
         
-        throw new APIError(
+        next(new APIError(
           'Validation failed',
           400,
           'VALIDATION_ERROR',
           validationErrors
-        );
+        ));
+      } else {
+        next(error);
       }
-      next(error);
     }
   };
 }; 

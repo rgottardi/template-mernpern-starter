@@ -45,13 +45,13 @@ app.get('/', (_req, res) => {
   res.success({ message: 'Server is running!' });
 });
 
-// Public routes
-app.use('/health', routes);
+// Public routes (no authentication required)
+app.use('/', routes);
 
-// Protected routes
+// Protected routes (require authentication)
 app.use('/api', [
-  authenticate, // JWT authentication
-  tenantMiddleware, // Multi-tenant handling
+  authenticate,
+  tenantMiddleware,
   routes
 ]);
 

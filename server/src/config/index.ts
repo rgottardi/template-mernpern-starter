@@ -1,6 +1,13 @@
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
-dotenv.config();
+// Get the directory path for the current module
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Configure dotenv to look in the root directory (three levels up from config folder)
+// server/src/config -> server/src -> server -> root
+dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
 // Determine if services are running in Docker
 const isServicesInDocker = process.env.SERVICES_IN_DOCKER === 'true' || process.env.NODE_ENV === 'docker';
@@ -13,10 +20,10 @@ export const CONFIG = {
   
   // JWT configuration
   JWT: {
-    SECRET: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production',
-    EXPIRES_IN: process.env.JWT_EXPIRES_IN || '24h',
-    REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'your-super-secret-refresh-key-change-in-production',
-    REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+    SECRET: process.env.JWT_SECRET,
+    REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
+    EXPIRES_IN: process.env.JWT_EXPIRES_IN || '15m',
+    REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
   },
 
   // Security configuration
