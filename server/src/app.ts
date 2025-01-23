@@ -15,11 +15,8 @@ import { responseFormatter } from './middleware/response.js';
 import { authenticateToken } from './middleware/auth.js';
 import { tenantMiddleware } from './middleware/tenant.js';
 import { databaseService } from './services/database.js';
-import { postgresService } from './services/postgres.js';
-import { redisService } from './services/redis.js';
-import { emailService } from './services/email.js';
-import { storageService } from './services/storage.js';
 import { serviceInitializer } from './services/init.js';
+import routes from './routes/index.js';
 
 dotenv.config();
 
@@ -41,59 +38,20 @@ app.use(morgan('combined', { stream }));
 // Response formatting middleware
 app.use(responseFormatter);
 
-// Public routes (no auth required)
+// Basic root route
 app.get('/', (_req, res) => {
   res.success({ message: 'Server is running!' });
 });
 
-app.get('/health', (_req, res) => {
-  res.success({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    services: {
-      mongodb: {
-        status: databaseService.getConnectionState() === 1 ? 'connected' : 'disconnected',
-        state: databaseService.getConnectionState(),
-      },
-      postgres: {
-        status: postgresService.isConnectedToPostgres() ? 'connected' : 'disconnected',
-      },
-      redis: {
-        status: redisService.isConnectedToRedis() ? 'connected' : 'disconnected',
-      },
-      email: {
-        status: emailService.isEmailServiceInitialized() ? 'initialized' : 'not initialized',
-      },
-      storage: {
-        status: storageService.isStorageServiceInitialized() ? 'initialized' : 'not initialized',
-        defaultBucket: storageService.getDefaultBucket(),
-      }
-    },
-    environment: CONFIG.NODE_ENV,
-    port: CONFIG.PORT,
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
-  });
-});
+// Public routes
+app.use('/health', routes);
 
-// Protected routes middleware
+// Protected routes
 app.use('/api', [
   authenticateToken, // JWT authentication
   tenantMiddleware, // Multi-tenant handling
+  routes
 ]);
-
-// Protected routes
-app.get('/api/debug', (_req, res) => {
-  res.success({
-    environment: CONFIG.NODE_ENV,
-    mongoURI: CONFIG.MONGODB.URI,
-    port: CONFIG.PORT,
-    mongooseState: databaseService.getConnectionState(),
-    nodeVersion: process.version,
-    memoryUsage: process.memoryUsage(),
-    uptime: process.uptime()
-  });
-});
 
 // Error handling (should be last)
 app.use(errorHandler);
