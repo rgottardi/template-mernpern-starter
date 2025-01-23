@@ -54,8 +54,7 @@ services:
       retries: 5
 
   mailhog:
-    image: jcalonso/mailhog:latest
-    platform: linux/arm64
+    image: lytrax/mailhog:latest
     container_name: mailhog
     ports:
       - "${MAILHOG_SMTP_PORT:-1025}:1025"
@@ -63,10 +62,11 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "1025"]
+      test: ["CMD", "wget", "--spider", "--quiet", "http://localhost:8025"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
   localstack:
     image: localstack/localstack
@@ -181,6 +181,7 @@ services:
 
   redis-commander:
     image: rediscommander/redis-commander:latest
+    platform: linux/amd64
     container_name: redis-commander
     ports:
       - "${REDIS_COMMANDER_PORT:-8082}:8081"

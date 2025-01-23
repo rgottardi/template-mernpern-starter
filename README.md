@@ -11,6 +11,12 @@ A modern full-stack starter template using MongoDB/PostgreSQL, Express.js, React
 - 🔒 TypeScript throughout
 - ⭐ React Query for data fetching
 - 📝 ESLint + Prettier configured
+- 📊 MongoDB & PostgreSQL support
+- 📧 MailHog for email testing
+- 🔄 Redis for caching
+- 🗄️ LocalStack for AWS S3 emulation
+- 📱 MongoDB Express & pgAdmin for database management
+- 🔍 Redis Commander for cache inspection
 
 ## Getting Started
 
@@ -18,8 +24,8 @@ A modern full-stack starter template using MongoDB/PostgreSQL, Express.js, React
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/your-repo-name.git
-cd your-repo-name
+git clone https://github.com/rgottardi/template-mernpern-starter.git
+cd template-mernpern-starter
 ```
 
 2. Install dependencies:
@@ -41,6 +47,13 @@ Your application will be available at:
 - Frontend: http://localhost:5173
 - Backend: http://localhost:3000
 - MongoDB: localhost:27017
+- PostgreSQL: localhost:5432
+- Redis: localhost:6379
+- MailHog UI: http://localhost:8025
+- MongoDB Express: http://localhost:8081
+- pgAdmin: http://localhost:5050
+- Redis Commander: http://localhost:8082
+- LocalStack (S3): http://localhost:4566
 
 ### Available Scripts
 
@@ -107,11 +120,45 @@ template-mernpern-starter/
 
 ### Root (.env)
 ```env
+# Environment Configuration
 NODE_ENV=development
+
+# Development Ports
 CLIENT_PORT=5173
 SERVER_PORT=3000
 MONGODB_PORT=27017
+
+# Docker Configuration
 COMPOSE_PROJECT_NAME=mernpern-starter
+
+# PostgreSQL
+POSTGRES_PORT=5432
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=mernapp
+
+# Redis
+REDIS_PORT=6379
+
+# MailHog
+MAILHOG_SMTP_PORT=1025
+MAILHOG_UI_PORT=8025
+
+# LocalStack (AWS S3)
+LOCALSTACK_PORT=4566
+
+# MongoDB Express
+MONGO_EXPRESS_PORT=8081
+MONGO_EXPRESS_USER=admin
+MONGO_EXPRESS_PASS=pass
+
+# pgAdmin
+PGADMIN_PORT=5050
+PGADMIN_EMAIL=admin@admin.com
+PGADMIN_PASSWORD=admin
+
+# Redis Commander
+REDIS_COMMANDER_PORT=8082
 ```
 
 ### Client (.env)
@@ -128,10 +175,13 @@ VITE_GOOGLE_ANALYTICS=
 PORT=3000
 NODE_ENV=development
 MONGODB_URI=mongodb://mongodb:27017/mernapp
+POSTGRES_URI=postgresql://postgres:postgres@postgres:5432/mernapp
+REDIS_URI=redis://redis:6379
 JWT_SECRET=your_jwt_secret_key
 SMTP_HOST=mailhog
 SMTP_PORT=1025
 EMAIL_FROM=noreply@example.com
+AWS_ENDPOINT=http://localstack:4566
 ```
 
 ## Development
