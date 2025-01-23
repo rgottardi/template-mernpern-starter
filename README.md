@@ -257,8 +257,8 @@ LOCALSTACK_PORT=4566
 
 # MongoDB Express
 MONGO_EXPRESS_PORT=8081
-MONGO_EXPRESS_USER=admin
-MONGO_EXPRESS_PASS=pass
+MONGO_EXPRESS_USER=admin    # Basic auth username
+MONGO_EXPRESS_PASS=pass     # Basic auth password
 
 # pgAdmin
 PGADMIN_PORT=5050
@@ -311,7 +311,9 @@ MIT
 
 #### MongoDB (via MongoDB Express)
 - **URL**: http://localhost:8081
-- **Default Credentials**: None (development mode)
+- **Default Credentials**:
+  - Username: admin
+  - Password: pass
 - **Features**:
   - Browse/create/delete databases
   - Manage collections and documents
