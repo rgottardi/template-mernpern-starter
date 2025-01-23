@@ -15,6 +15,10 @@ import { responseFormatter } from './middleware/response.js';
 import { authenticateToken } from './middleware/auth.js';
 import { tenantMiddleware } from './middleware/tenant.js';
 import { databaseService } from './services/database.js';
+import { postgresService } from './services/postgres.js';
+import { redisService } from './services/redis.js';
+import { emailService } from './services/email.js';
+import { storageService } from './services/storage.js';
 import { serviceInitializer } from './services/init.js';
 
 dotenv.config();
@@ -46,9 +50,29 @@ app.get('/health', (_req, res) => {
   res.success({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    mongodb: databaseService.getConnectionState() === 1 ? 'connected' : 'disconnected',
+    services: {
+      mongodb: {
+        status: databaseService.getConnectionState() === 1 ? 'connected' : 'disconnected',
+        state: databaseService.getConnectionState(),
+      },
+      postgres: {
+        status: postgresService.isConnectedToPostgres() ? 'connected' : 'disconnected',
+      },
+      redis: {
+        status: redisService.isConnectedToRedis() ? 'connected' : 'disconnected',
+      },
+      email: {
+        status: emailService.isEmailServiceInitialized() ? 'initialized' : 'not initialized',
+      },
+      storage: {
+        status: storageService.isStorageServiceInitialized() ? 'initialized' : 'not initialized',
+        defaultBucket: storageService.getDefaultBucket(),
+      }
+    },
     environment: CONFIG.NODE_ENV,
-    port: CONFIG.PORT
+    port: CONFIG.PORT,
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
   });
 });
 

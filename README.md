@@ -22,21 +22,58 @@ A modern full-stack starter template using MongoDB/PostgreSQL, Express.js, React
 - 🔐 JWT authentication and RBAC
 - 📡 API rate limiting and compression
 
-## Security & Middleware Features
+## Service Architecture
 
-### Authentication & Authorization
+### Database Services
+1. **MongoDB Service**
+   - Primary database for document storage
+   - Connection pooling and retry logic
+   - Health monitoring and graceful shutdown
+   - Connection state tracking
+
+2. **PostgreSQL Service**
+   - Relational database for structured data
+   - Connection pool management
+   - Transaction support with automatic rollback
+   - Query execution with parameterization
+   - Event handling and health monitoring
+
+3. **Redis Service**
+   - In-memory caching and session storage
+   - Connection retry strategy
+   - Pub/sub capabilities
+   - Key-value operations with TTL support
+   - Health monitoring and event handling
+
+### Storage Service (LocalStack S3)
+- File storage with AWS S3 compatibility
+- Automatic bucket creation and management
+- Pre-signed URL generation for direct upload/download
+- File operations (upload, download, delete)
+- Bucket listing and object management
+
+### Email Service (MailHog)
+- Email sending capabilities
+- HTML and text email support
+- Attachment handling
+- Test email functionality
+- Development email catching
+
+### Security & Middleware Features
+
+#### Authentication & Authorization
 - JWT-based authentication
 - Role-Based Access Control (RBAC)
 - Secure token handling and validation
 - Refresh token support
 
-### Multi-tenancy
+#### Multi-tenancy
 - Tenant isolation
 - Subdomain-based tenant recognition
 - Header-based tenant identification
 - JWT-based tenant context
 
-### Security Features
+#### Security Features
 - Helmet security headers
 - Rate limiting protection
 - CORS configuration
@@ -45,14 +82,14 @@ A modern full-stack starter template using MongoDB/PostgreSQL, Express.js, React
 - Content Security Policy
 - HTTP Security Headers
 
-### API Features
+#### API Features
 - Request validation (Zod)
 - Standardized API responses
 - Error handling and formatting
 - Response compression
 - Request logging
 
-### Middleware Stack
+#### Middleware Stack
 1. Basic Middleware
    - JSON body parsing
    - URL-encoded body parsing
@@ -71,6 +108,11 @@ A modern full-stack starter template using MongoDB/PostgreSQL, Express.js, React
    - Error handling
 
 ## Getting Started
+
+### Prerequisites
+- Node.js >= 20.0.0
+- npm >= 10.0.0
+- Docker and Docker Compose
 
 ### Quick Start
 
@@ -106,6 +148,20 @@ Your application will be available at:
 - pgAdmin: http://localhost:5050
 - Redis Commander: http://localhost:8082
 - LocalStack (S3): http://localhost:4566
+
+### Service Health Checks
+
+You can check the health of all services by visiting:
+```
+http://localhost:3000/health
+```
+
+This will return the status of:
+- MongoDB connection
+- PostgreSQL connection
+- Redis connection
+- Email service
+- Storage service (LocalStack S3)
 
 ### Available Scripts
 
@@ -158,7 +214,7 @@ template-mernpern-starter/
 │   │   ├── middleware/   # Express middleware
 │   │   ├── models/       # Database models
 │   │   ├── routes/       # API routes
-│   │   ├── services/     # Business logic
+│   │   ├── services/     # Service layer
 │   │   └── types/        # TypeScript types
 │   └── ...
 ├── scripts/              # Development scripts
@@ -245,49 +301,6 @@ SMTP_HOST=mailhog
 SMTP_PORT=1025
 EMAIL_FROM=noreply@example.com
 AWS_ENDPOINT=http://localstack:4566
-```
-
-## Development
-
-### Prerequisites
-- Node.js >= 20.0.0
-- npm >= 10.0.0
-- Docker and Docker Compose
-
-### Local Development
-
-1. Install dependencies:
-```bash
-npm run install:all
-```
-
-2. Set up environment:
-```bash
-npm run env:setup
-npm run env:check  # Validate environment
-```
-
-3. Start development servers:
-```bash
-npm run dev
-```
-
-### Using Docker
-
-1. Build and start containers:
-```bash
-npm run docker:build
-npm run docker:up
-```
-
-2. View logs:
-```bash
-npm run docker:logs
-```
-
-3. Clean up:
-```bash
-npm run docker:clean
 ```
 
 ## License
