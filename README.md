@@ -17,6 +17,58 @@ A modern full-stack starter template using MongoDB/PostgreSQL, Express.js, React
 - 🗄️ LocalStack for AWS S3 emulation
 - 📱 MongoDB Express & pgAdmin for database management
 - 🔍 Redis Commander for cache inspection
+- 🛡️ Comprehensive security middleware
+- 🏢 Multi-tenant architecture support
+- 🔐 JWT authentication and RBAC
+- 📡 API rate limiting and compression
+
+## Security & Middleware Features
+
+### Authentication & Authorization
+- JWT-based authentication
+- Role-Based Access Control (RBAC)
+- Secure token handling and validation
+- Refresh token support
+
+### Multi-tenancy
+- Tenant isolation
+- Subdomain-based tenant recognition
+- Header-based tenant identification
+- JWT-based tenant context
+
+### Security Features
+- Helmet security headers
+- Rate limiting protection
+- CORS configuration
+- XSS protection
+- CSRF protection
+- Content Security Policy
+- HTTP Security Headers
+
+### API Features
+- Request validation (Zod)
+- Standardized API responses
+- Error handling and formatting
+- Response compression
+- Request logging
+
+### Middleware Stack
+1. Basic Middleware
+   - JSON body parsing
+   - URL-encoded body parsing
+
+2. Security Middleware
+   - Security headers (Helmet)
+   - CORS handling
+   - Rate limiting
+   - Response compression
+
+3. Application Middleware
+   - Request logging
+   - Response formatting
+   - Authentication
+   - Multi-tenancy
+   - Error handling
 
 ## Getting Started
 
@@ -178,6 +230,17 @@ MONGODB_URI=mongodb://mongodb:27017/mernapp
 POSTGRES_URI=postgresql://postgres:postgres@postgres:5432/mernapp
 REDIS_URI=redis://redis:6379
 JWT_SECRET=your_jwt_secret_key
+JWT_EXPIRES_IN=24h
+JWT_REFRESH_SECRET=your_jwt_refresh_secret_key
+JWT_REFRESH_EXPIRES_IN=7d
+RATE_LIMIT_WINDOW_MS=900000  # 15 minutes
+RATE_LIMIT_MAX_REQUESTS=100
+CLIENT_URL=https://yourdomain.com  # CORS origin in production
+ENABLE_SECURITY_HEADERS=true
+ENABLE_RATE_LIMITING=true
+ENABLE_COMPRESSION=true
+DEFAULT_TENANT=default
+TENANT_HEADER_NAME=X-Tenant-ID
 SMTP_HOST=mailhog
 SMTP_PORT=1025
 EMAIL_FROM=noreply@example.com

@@ -6,25 +6,43 @@ import morgan from 'morgan';
 import { errorHandler } from './middleware/error.js';
 import { CONFIG } from './config/index.js';
 import { logger, stream } from './config/logger.js';
+import { 
+  rateLimiter, 
+  securityHeaders, 
+  compressionMiddleware, 
+  corsMiddleware 
+} from './middleware/security.js';
+import { responseFormatter } from './middleware/response.js';
+import { authenticateToken } from './middleware/auth.js';
+import { tenantMiddleware } from './middleware/tenant.js';
 
 dotenv.config();
 
 const app: Express = express();
 
-// Middleware
-app.use(cors());
+// Basic middleware (should be first)
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// HTTP request logging
+// Security middleware
+app.use(securityHeaders); // Helmet security headers
+app.use(corsMiddleware); // CORS configuration
+app.use(rateLimiter); // Rate limiting
+app.use(compressionMiddleware); // Response compression
+
+// Logging middleware
 app.use(morgan('combined', { stream }));
 
-// Routes
+// Response formatting middleware
+app.use(responseFormatter);
+
+// Public routes (no auth required)
 app.get('/', (_req, res) => {
-  res.json({ message: 'Server is running!' });
+  res.success({ message: 'Server is running!' });
 });
 
 app.get('/health', (_req, res) => {
-  res.json({ 
+  res.success({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
     mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
@@ -33,9 +51,15 @@ app.get('/health', (_req, res) => {
   });
 });
 
-// Debug route
-app.get('/debug', (_req, res) => {
-  res.json({
+// Protected routes middleware
+app.use('/api', [
+  authenticateToken, // JWT authentication
+  tenantMiddleware, // Multi-tenant handling
+]);
+
+// Protected routes
+app.get('/api/debug', (_req, res) => {
+  res.success({
     environment: CONFIG.NODE_ENV,
     mongoURI: CONFIG.MONGODB.URI,
     port: CONFIG.PORT,
@@ -46,7 +70,7 @@ app.get('/debug', (_req, res) => {
   });
 });
 
-// Error handling
+// Error handling (should be last)
 app.use(errorHandler);
 
 // Update logging

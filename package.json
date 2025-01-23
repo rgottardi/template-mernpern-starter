@@ -11,33 +11,27 @@
     "// Development Modes": "----------",
     "dev": "npm run services:up && concurrently \"npm run dev:client\" \"npm run dev:server\"",
     "dev:docker": "docker compose up -d",
-    
     "// Local Development": "----------",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run dev",
-    
     "// Docker Services": "----------",
     "services:up": "docker compose up -d mongodb postgres redis mailhog localstack mongo-express pgadmin redis-commander",
     "services:down": "docker compose down",
     "services:logs": "docker compose logs -f mongodb postgres redis mailhog localstack mongo-express pgadmin redis-commander",
     "services:restart": "docker compose restart mongodb postgres redis mailhog localstack mongo-express pgadmin redis-commander",
-    
     "// Individual Services": "----------",
     "service:mongodb": "docker compose up -d mongodb mongo-express",
     "service:postgres": "docker compose up -d postgres pgadmin",
     "service:redis": "docker compose up -d redis redis-commander",
     "service:mailhog": "docker compose up -d mailhog",
     "service:localstack": "docker compose up -d localstack",
-    
     "// Installation": "----------",
     "install:all": "npm install && cd client && npm install && cd ../server && npm install",
     "clean:all": "rm -rf node_modules && rm -rf client/node_modules && rm -rf server/node_modules",
-    
     "// Building": "----------",
     "build:all": "cd client && npm run build && cd ../server && npm run build",
     "test:all": "concurrently \"cd client && npm test\" \"cd server && npm test\"",
     "lint:all": "concurrently \"cd client && npm run lint\" \"cd server && npm run lint\"",
-    
     "// Docker Management": "----------",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
@@ -47,12 +41,10 @@
     "docker:restart": "docker compose restart",
     "docker:prune": "docker system prune -f",
     "docker:rebuild": "npm run docker:clean && npm run docker:prune && npm run docker:build && npm run docker:up",
-    
     "// Environment": "----------",
     "env:setup": "node scripts/setup-env.js",
     "env:check": "node scripts/check-env.js",
     "env:update": "node scripts/update-env.js",
-    
     "// Service Logs": "----------",
     "logs:mongodb": "docker logs mongodb -f",
     "logs:postgres": "docker logs postgres -f",
@@ -64,7 +56,6 @@
     "logs:mongo-express": "docker logs mongo-express -f",
     "logs:pgadmin": "docker logs pgadmin -f",
     "logs:redis-commander": "docker logs redis-commander -f",
-    
     "// Cleanup": "----------",
     "docker:clean:localstack": "npm run docker:down && npm run docker:clean && docker volume rm ${COMPOSE_PROJECT_NAME:-mernpern-starter}_localstack_data && npm run docker:up",
     "docker:clean:all": "npm run docker:down && npm run docker:clean && docker volume prune -f && npm run docker:up",
@@ -77,5 +68,8 @@
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
   }
 }
