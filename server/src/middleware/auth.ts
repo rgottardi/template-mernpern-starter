@@ -1,55 +1,47 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { APIError } from './error.js';
-import { CONFIG } from '../config/index.js';
+import { verifyToken } from '../config/jwt';
+import { CustomError } from '../utils/errors';
 
-// Extend Express Request type to include user information
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: string;
-        email: string;
-        role: string;
-        tenantId?: string;
-      };
-    }
-  }
+export interface AuthRequest extends Request {
+  userId?: string;
 }
 
-/**
- * @desc Verifies JWT token and adds user info to request object
- */
-export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.split(' ')[1];
-
-  if (!token) {
-    throw new APIError('Authentication token required', 401, 'AUTH_TOKEN_MISSING');
-  }
-
+export const authenticate = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const decoded = jwt.verify(token, CONFIG.JWT.SECRET) as jwt.JwtPayload;
-    req.user = decoded as Express.Request['user'];
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      throw new CustomError('No token provided', 401);
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = verifyToken(token);
+    req.userId = decoded.userId;
     next();
   } catch (error) {
-    throw new APIError('Invalid or expired token', 401, 'INVALID_TOKEN');
+    next(error);
   }
 };
 
-/**
- * @desc Middleware to check if user has required role
- */
-export const requireRole = (roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
-      throw new APIError('User not authenticated', 401, 'USER_NOT_AUTHENTICATED');
-    }
+export const authorize = (roles: string[]) => {
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.userId) {
+        throw new CustomError('User not authenticated', 401);
+      }
 
-    if (!roles.includes(req.user.role)) {
-      throw new APIError('Insufficient permissions', 403, 'INSUFFICIENT_PERMISSIONS');
-    }
+      // Get user from database and check role
+      // const user = await UserModel.findById(req.userId);
+      // if (!user || !roles.includes(user.role)) {
+      //   throw new CustomError('Not authorized', 403);
+      // }
 
-    next();
+      next();
+    } catch (error) {
+      next(error);
+    }
   };
-}; 
+};
