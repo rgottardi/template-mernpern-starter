@@ -2,8 +2,10 @@ import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import morgan from 'morgan';
 import { errorHandler } from './middleware/error.js';
 import { CONFIG } from './config/index.js';
+import { logger, stream } from './config/logger.js';
 
 dotenv.config();
 
@@ -13,11 +15,8 @@ const app: Express = express();
 app.use(cors());
 app.use(express.json());
 
-// Debug logging middleware
-app.use((req: Request, _res: Response, next) => {
-  console.log(`📥 ${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
-});
+// HTTP request logging
+app.use(morgan('combined', { stream }));
 
 // Routes
 app.get('/', (_req, res) => {
@@ -51,24 +50,28 @@ app.get('/debug', (_req, res) => {
 app.use(errorHandler);
 
 // Update logging
-console.log('🚀 Server starting up...');
-console.log(`🔧 Environment: ${CONFIG.NODE_ENV}`);
-console.log(`📡 MongoDB URI: ${CONFIG.MONGODB.URI}`);
-console.log(`🔍 Running in Docker: ${CONFIG.NODE_ENV === 'docker' ? 'Yes' : 'No'}`);
-console.log(`🌐 Server will listen on port: ${CONFIG.PORT}`);
+logger.info('🚀 Server starting up...');
+logger.info(`🔧 Environment: ${CONFIG.NODE_ENV}`);
+logger.info(`📡 MongoDB URI: ${CONFIG.MONGODB.URI}`);
+logger.info(`🔍 Running in Docker: ${CONFIG.NODE_ENV === 'docker' ? 'Yes' : 'No'}`);
+logger.info(`🌐 Server will listen on port: ${CONFIG.PORT}`);
 
 // Update database connection
 const connectWithRetry = async (retries = CONFIG.DEBUG.RETRY_ATTEMPTS, interval = CONFIG.DEBUG.RETRY_INTERVAL): Promise<boolean> => {
   for (let i = 0; i < retries; i++) {
     try {
       await mongoose.connect(CONFIG.MONGODB.URI, CONFIG.MONGODB.OPTIONS);
-      console.log('✅ Connected to MongoDB');
+      logger.info('✅ Connected to MongoDB');
       return true;
     } catch (error) {
       const remaining = retries - i - 1;
-      console.error(`❌ MongoDB connection attempt ${i + 1} failed:`, error instanceof Error ? error.message : 'Unknown error');
+      logger.error('❌ MongoDB connection attempt failed:', {
+        attempt: i + 1,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        remaining,
+      });
       if (remaining > 0) {
-        console.log(`⏳ Retrying in ${interval/1000}s... (${remaining} attempts remaining)`);
+        logger.info(`⏳ Retrying in ${interval/1000}s... (${remaining} attempts remaining)`);
         await new Promise(resolve => setTimeout(resolve, interval));
       }
     }
@@ -81,19 +84,21 @@ connectWithRetry()
   .then(success => {
     if (success) {
       app.listen(CONFIG.PORT, '0.0.0.0', () => {
-        console.log(`🚀 Server running on http://localhost:${CONFIG.PORT}`);
-        console.log('📍 Available routes:');
-        console.log('   - GET /         -> Basic server check');
-        console.log('   - GET /health   -> Health status');
-        console.log('   - GET /debug    -> Debug information');
+        logger.info(`🚀 Server running on http://localhost:${CONFIG.PORT}`);
+        logger.info('📍 Available routes:');
+        logger.info('   - GET /         -> Basic server check');
+        logger.info('   - GET /health   -> Health status');
+        logger.info('   - GET /debug    -> Debug information');
       });
     } else {
-      console.error('❌ Failed to connect to MongoDB after multiple retries');
+      logger.error('❌ Failed to connect to MongoDB after multiple retries');
       process.exit(1);
     }
   })
   .catch((error: unknown) => {
-    console.error('❌ Fatal error during startup:', error instanceof Error ? error.message : 'Unknown error');
+    logger.error('❌ Fatal error during startup:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     process.exit(1);
   });
 
