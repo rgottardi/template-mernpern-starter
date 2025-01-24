@@ -26,7 +26,7 @@ if (!CONFIG.JWT.SECRET || !CONFIG.JWT.REFRESH_SECRET) {
   throw new Error('JWT_SECRET and JWT_REFRESH_SECRET must be defined in environment variables');
 }
 
-export const generateTokens = (payload: TokenPayload) => {
+export const generateTokens = async (payload: TokenPayload & { refreshTokenVersion?: number }) => {
   const accessToken = jwt.sign(
     payload,
     CONFIG.JWT.SECRET as jwt.Secret,
@@ -34,7 +34,10 @@ export const generateTokens = (payload: TokenPayload) => {
   );
 
   const refreshToken = jwt.sign(
-    { userId: payload.userId, version: Date.now() },
+    { 
+      userId: payload.userId, 
+      version: typeof payload.refreshTokenVersion === 'number' ? payload.refreshTokenVersion : 0 
+    },
     CONFIG.JWT.REFRESH_SECRET as jwt.Secret,
     { expiresIn: CONFIG.JWT.REFRESH_EXPIRES_IN }
   );
